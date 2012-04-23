@@ -78,7 +78,6 @@ class Mpg(object):
 
     def load(self, filename):
         '''Load a new file to play'''
-        print 'setting firstTime to False'
         self._states.playing['playing'] = True
         self._send('LOAD %s' % filename)
 
@@ -103,7 +102,6 @@ class Mpg(object):
     @property
     def playing(self):
         '''Return True if music is currently playing'''
-        #return self._states.playing['framesRemaining'] >= 1
         return self._states.playing['playing']
 
     @property
@@ -126,4 +124,4 @@ if __name__ == '__main__':
         if not p.playing:
             print 'playing next'
             p.playNext()
-        if not i%10: print i, p._states.playing, p.playing
+        if not i%100: print i, p._states.playing, p.playing
