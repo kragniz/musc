@@ -5,22 +5,26 @@ import threading
 import time
 
 class Mpg(object):
-    command = 'mpg123'
+    command = 'mpg123' #the command used to play mp3 files
 
     class States(object):
-        threadRunning = True
-        playing = {
-                    'playStatus' : 0,
-                    'currentFrame' : None,
-                    'framesRemaining' : 0,
-                    'currentTime' : 0,
-                    'timeRemaining' : 0,
-                    'playing' : False
-                  }
-        inputLock = threading.Lock()
-        outputLock = threading.Lock()
+        '''Class used to hold bunch of states'''
+        def __init__(self):
+            self.threadRunning = True
+
+            self.playStatus = 0
+            self.currentFrame = None
+            self.framesRemaining = 0
+            self.currentTime = 0
+            self.timeRemaining = 0
+            self.playing = False
+            self.volume = 100
+
+            self.inputLock = threading.Lock()
+            self.outputLock = threading.Lock()
 
     class InputGetter(threading.Thread):
+        '''Thread used to collect status from mpg's stdout'''
         def __init__(self, reader, states):
             super(Mpg.InputGetter, self).__init__()
             self._reader = reader
@@ -34,19 +38,19 @@ class Mpg(object):
                     lines = output[3:].split()
 
                     if outputType == 'F':
-                        self._states.playing['currentFrame']    = float(lines[0])
-                        self._states.playing['framesRemaining'] = float(lines[1])
-                        self._states.playing['currentTime']     = float(lines[2])
-                        self._states.playing['timeRemaining']   = float(lines[3])
+                        self._states.currentFrame    = float(lines[0])
+                        self._states.framesRemaining = float(lines[1])
+                        self._states.currentTime     = float(lines[2])
+                        self._states.timeRemaining   = float(lines[3])
 
                     elif outputType == 'P':
-                        self._states.playing['playStatus'] = int(lines[0])
+                        self._states.playStatus = int(lines[0])
 
-                frames = self._states.playing['framesRemaining']
+                frames = self._states.framesRemaining
                 if frames <= 4:# and frames is not None:
-                    self._states.playing['playing'] = False
+                    self._states.playing = False
                 else:
-                    self._states.playing['playing'] = True
+                    self._states.playing = True
 
     def __init__(self):
         self.__mpgProc = Popen([self.command, '-R', 'null'],
@@ -88,6 +92,16 @@ class Mpg(object):
         '''Pause the music'''
         self._send('PAUSE')
 
+    @property
+    def volume(self):
+        '''volume of the player'''
+        return self._states.volume
+
+    @volume.setter
+    def volume(self, v):
+        self._states.volume = v
+        self._send('VOLUME %s' % v)
+
     def playNext(self):
         '''Load the next item in the queue and remove it from the queue'''
         print 'loading next file...'
@@ -106,14 +120,15 @@ class Mpg(object):
     @property
     def playing(self):
         '''Return True if music is currently playing'''
-        return self._states.playing['playing'] is True
+        return self._states.playing is True
 
     @playing.setter
     def playing(self, b):
-        self._states.playing['playing'] = b
+        self._states.playing = b
 
     @property
     def queue(self):
+        '''List holding queue of files to play'''
         return self._playQueue
 
     @queue.setter
@@ -132,4 +147,4 @@ if __name__ == '__main__':
             print 'playing next'
             p.playNext()
             time.sleep(2)
-        if not i % 100000: print i, p._states.playing, p.playing
+        if not i % 100000: print i, p.playing
