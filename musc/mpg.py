@@ -2,15 +2,16 @@
 
 from subprocess import Popen, PIPE
 import threading
+import time
 
 class Mpg(object):
-    command = 'mpg321'
+    command = 'mpg123'
 
     class States(object):
         threadRunning = True
         playing = {
                     'playStatus' : 0,
-                    'currentFrame' : 0,
+                    'currentFrame' : None,
                     'framesRemaining' : 0,
                     'currentTime' : 0,
                     'timeRemaining' : 0,
@@ -21,7 +22,7 @@ class Mpg(object):
 
     class InputGetter(threading.Thread):
         def __init__(self, reader, states):
-            threading.Thread.__init__(self)
+            super(Mpg.InputGetter, self).__init__()
             self._reader = reader
             self._states = states
             
@@ -41,8 +42,11 @@ class Mpg(object):
                     elif outputType == 'P':
                         self._states.playing['playStatus'] = int(lines[0])
 
-                    if self._states.playing['framesRemaining'] <= 4:
-                        self._states.playing['playing'] = False
+                frames = self._states.playing['framesRemaining']
+                if frames <= 4:# and frames is not None:
+                    self._states.playing['playing'] = False
+                else:
+                    self._states.playing['playing'] = True
 
     def __init__(self):
         self.__mpgProc = Popen([self.command, '-R', 'null'],
@@ -78,21 +82,21 @@ class Mpg(object):
 
     def load(self, filename):
         '''Load a new file to play'''
-        self._states.playing['playing'] = True
         self._send('LOAD %s' % filename)
 
     def pause(self):
         '''Pause the music'''
         self._send('PAUSE')
 
-    def _update_from_output(self):
-        '''Update status from the current output'''
-
     def playNext(self):
         '''Load the next item in the queue and remove it from the queue'''
         print 'loading next file...'
-        self._states.playing['playing'] = True
-        self.load(self._playQueue.pop(0))
+        if self.hasItemsInQueue:
+            musicFile = self._playQueue.pop(0)
+            print 'loading', musicFile
+            self.load(musicFile)
+        else:
+            print 'no more items in queue.'
 
     @property
     def hasItemsInQueue(self):
@@ -102,7 +106,11 @@ class Mpg(object):
     @property
     def playing(self):
         '''Return True if music is currently playing'''
-        return self._states.playing['playing']
+        return self._states.playing['playing'] is True
+
+    @playing.setter
+    def playing(self, b):
+        self._states.playing['playing'] = b
 
     @property
     def queue(self):
@@ -120,8 +128,8 @@ if __name__ == '__main__':
     i = 0
     while 1:
         i += 1
-        p._update_from_output()
         if not p.playing:
             print 'playing next'
             p.playNext()
-        if not i%100: print i, p._states.playing, p.playing
+            time.sleep(2)
+        if not i % 100000: print i, p._states.playing, p.playing
