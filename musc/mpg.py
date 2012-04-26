@@ -102,15 +102,17 @@ class Mpg(object):
         self._states.volume = v
         self._send('VOLUME %s' % v)
 
-    def playNext(self):
+    def next(self):
         '''Load the next item in the queue and remove it from the queue'''
         print 'loading next file...'
         if self.hasItemsInQueue:
             musicFile = self._playQueue.pop(0)
             print 'loading', musicFile
             self.load(musicFile)
+            return True
         else:
             print 'no more items in queue.'
+            return False
 
     @property
     def hasItemsInQueue(self):
@@ -138,13 +140,15 @@ class Mpg(object):
 
 if __name__ == '__main__':
     p = Mpg()
-    p.queue = ["/media/CAMERA/Squaredance/14 Everybody Rush.mp3",
-               "/media/CAMERA/Squaredance/30 Deep Beep (feat. Jackal Queenston.mp3"]
+    p.queue = ["/media/CAMERA/Squaredance/30 Deep Beep (feat. Jackal Queenston.mp3",
+               '/media/CAMERA/Caravan Palace/15 - La_Caravane.mp3',
+               '/media/CAMERA/Caravan Palace/9 - Brotherswing.mp3',
+               '/media/CAMERA/Caravan Palace/2 - Star_Scat.mp3']
     i = 0
     while 1:
         i += 1
         if not p.playing:
             print 'playing next'
-            p.playNext()
+            p.next()
             time.sleep(2)
-        if not i % 100000: print i, p.playing
+        if not i % 100000: print 'playing:', p.playing
