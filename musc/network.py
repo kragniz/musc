@@ -1,8 +1,20 @@
 import json
+import socket
 
 class Client(object):
     def __init_(self, port=7785, host='localhost'):
-        pass
+        self._sock = socket.socket(
+                socket.AF_INET,
+                socket.SOCK_STREAM
+            )
+        self._port = port
+        self._host = host
+
+    def send(self, data):
+        self._sock.connect(
+                self._host,
+                self._port
+            )
 
 class Protocol(object):
     '''Generates and returns some protocol strings'''
