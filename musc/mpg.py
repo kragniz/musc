@@ -23,6 +23,20 @@ class Mpg(object):
             self.inputLock = threading.Lock()
             self.outputLock = threading.Lock()
 
+        def __str__(self):
+            return str(self.__dict__())
+
+        def __dict__(self):
+            return {
+                    'playStatus': self.playStatus,
+                    'currentFrame': self.currentFrame,
+                    'framesRemaining': self.framesRemaining,
+                    'currentTime': self.currentTime,
+                    'timeRemaining': self.timeRemaining,
+                    'playing': self.playing,
+                    'volume': self.volume
+                    }
+
     class InputGetter(threading.Thread):
         '''Thread used to collect status from mpg's stdout'''
         def __init__(self, reader, states):
@@ -140,10 +154,10 @@ class Mpg(object):
 
 if __name__ == '__main__':
     p = Mpg()
-    p.queue = ["/media/CAMERA/Squaredance/30 Deep Beep (feat. Jackal Queenston.mp3",
-               '/media/CAMERA/Caravan Palace/15 - La_Caravane.mp3',
-               '/media/CAMERA/Caravan Palace/9 - Brotherswing.mp3',
-               '/media/CAMERA/Caravan Palace/2 - Star_Scat.mp3']
+    p.queue = ["/media/storage/music/Squaredance/30 Deep Beep (feat. Jackal Queenston.mp3",
+               '/media/storage/music/Caravan Palace/15 - La_Caravane.mp3',
+               '/media/storage/music/Caravan Palace/9 - Brotherswing.mp3',
+               '/media/storage/music/Caravan Palace/2 - Star_Scat.mp3']
     i = 0
     while 1:
         i += 1
