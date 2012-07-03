@@ -154,10 +154,7 @@ class Mpg(object):
 
 if __name__ == '__main__':
     p = Mpg()
-    p.queue = ["/media/storage/music/Squaredance/30 Deep Beep (feat. Jackal Queenston.mp3",
-               '/media/storage/music/Caravan Palace/15 - La_Caravane.mp3',
-               '/media/storage/music/Caravan Palace/9 - Brotherswing.mp3',
-               '/media/storage/music/Caravan Palace/2 - Star_Scat.mp3']
+    p.queue = ["/media/0000-0001/Balloon Party - 100- No Feeble Cheering - 05 The Little Toy Shop.mp3"]
     i = 0
     while 1:
         i += 1
