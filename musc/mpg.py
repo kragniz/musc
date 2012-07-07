@@ -18,6 +18,7 @@ class Mpg(object):
             self.currentTime = 0
             self.timeRemaining = 0
             self.playing = False
+            self.paused = False
             self.volume = 100
 
             self.inputLock = threading.Lock()
@@ -37,10 +38,10 @@ class Mpg(object):
                     'volume': self.volume
                     }
 
-    class InputGetter(threading.Thread):
+    class GetInput(threading.Thread):
         '''Thread used to collect status from mpg's stdout'''
         def __init__(self, reader, states):
-            super(Mpg.InputGetter, self).__init__()
+            super(Mpg.GetInput, self).__init__()
             self._reader = reader
             self._states = states
             
@@ -66,6 +67,18 @@ class Mpg(object):
                 else:
                     self._states.playing = True
 
+    class ManageQueue(threading.Thread):
+        def __init__(self, states, mpg):
+            super(Mpg.ManageQueue, self).__init__()
+            self._states = states
+            self._mpg = mpg
+
+        def run(self):
+            while True:
+                if not self._states.playing:
+                    self._mpg.next()
+                time.sleep(0.5)
+
     def __init__(self):
         self.__mpgProc = Popen([self.command, '-R', 'null'],
                 stdin=PIPE,
@@ -74,9 +87,12 @@ class Mpg(object):
         self._states = self.States()
 
         self._playQueue = []
-        inputThread = self.InputGetter(self._read,
-                                       self._states)
+        inputThread = self.GetInput(self._read,
+                                    self._states)
         inputThread.start()
+
+        queueThread = self.ManageQueue(self._states, self)
+        queueThread.start()
 
     def _send(self, message):
         '''Send a command to mpg'''
@@ -105,6 +121,7 @@ class Mpg(object):
     def pause(self):
         '''Pause the music'''
         self._send('PAUSE')
+        self._states.paused = not self._states.paused
 
     @property
     def volume(self):

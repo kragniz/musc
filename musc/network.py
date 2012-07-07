@@ -9,6 +9,8 @@ class Server(object):
         self._mpg = mpg.Mpg()
         self.loadPlaylist('/home/louis/playlist')
 
+        self._playmode = 'r'
+
     def doAction(self, args):
         '''Perform a server action based on the arguments given.'''
         if len(args) > 1:
@@ -16,8 +18,14 @@ class Server(object):
             command = args[1]
             if self._match('^p$|^pause$', command):
                 self._mpg.pause()
+
+            elif self._match('^r$|^random$|^rand$', command):
+                self._playmode = 'r'
+                return 'playing songs in a random order'
+
         else:
-            #we have no arguments, so skip to the next song
+            #we have no arguments, so skip to the next song if a song is
+            #playing
             self._mpg.next()
 
         return 'OK'
@@ -28,7 +36,10 @@ class Server(object):
 
     def _match(self, pattern, arg):
         '''Return True if the pattern can be matched in arg'''
-        return re.findall(pattern, arg) > 1
+        return re.findall(pattern, arg, flags=re.IGNORECASE) > 1
+
+    def mode(self):
+        return self._playmode
 
 class Client(object):
     def __init__(self):
