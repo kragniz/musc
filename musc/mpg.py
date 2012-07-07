@@ -61,7 +61,7 @@ class Mpg(object):
                         self._states.playStatus = int(lines[0])
 
                 frames = self._states.framesRemaining
-                if frames <= 4:# and frames is not None:
+                if frames <= 4:
                     self._states.playing = False
                 else:
                     self._states.playing = True

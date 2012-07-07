@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 import socket
 import musc
+import json
 
-server = musc.network.Server()
+server = musc.Server()
 HOST = ''
 PORT = musc.config.PORT
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -14,9 +15,9 @@ while True:
     while 1:
         data = conn.recv(1024)
         if not data: break
-        if server.doAction(data): #use data as the arbguments
-            conn.sendall('OK')
+        message = server.doAction(json.loads(data)['args'])
+        if message: #use data as the arguments
+            conn.sendall(str(message))
         else:
             conn.sendall('ERROR')
-        print 'data start:', data, 'data end'
     conn.close()

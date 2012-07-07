@@ -1,1 +1,2 @@
-PORT=6672
+PORT=6674
+HOST='localhost'

@@ -1,15 +1,8 @@
 #!/usr/bin/env python
-import socket
-import sys
-import json
+
 import musc
+import sys
 
-HOST = 'localhost'
-PORT = musc.config.PORT
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s.connect((HOST, PORT))
-
-s.sendall(json.dumps({'args':sys.argv}))
-data = s.recv(1024)
-s.close()
-print 'Received', repr(data)
+client = musc.Client()
+d = client.send(sys.argv)
+print 'Received', repr(d)

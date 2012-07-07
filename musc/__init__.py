@@ -1,3 +1,3 @@
-from mpg import Mpg
 import config
 import network
+from network import Client, Server
