@@ -146,7 +146,8 @@ class Mpg(object):
     @property
     def timeToScrobble(self):
         '''Return True if more than 30 seconds have elapsed'''
-        return self._states.timeRemaining < 10
+        return self._states.timeRemaining < 10 and  \
+               self._states.timeRemaining > 0
 
     @property
     def queue(self):

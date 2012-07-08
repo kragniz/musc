@@ -7,6 +7,7 @@ from mutagen import File
 import threading
 import time
 from scrobble import Scrobbler
+import sys
 
 class Server(object):
 
@@ -68,6 +69,10 @@ class Server(object):
             elif self._match('^r$|^random$|^rand$', command):
                 self._playmode = 'r'
                 return 'playing songs in a random order'
+
+            elif command == 'quit':
+                print 'quitting'
+                sys.exit()
 
         else:
             #we have no arguments, so skip to the next song if a song is

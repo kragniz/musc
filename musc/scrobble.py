@@ -19,6 +19,7 @@ class Scrobbler(object):
                   'api_key': config.apiKey,
                   'sk': self.sessionKey()}
         params['api_sig'] = self.sign(params)
+        self.request(params)
 
     def nowPlaying(self, artist, track):
         timestamp = str(int(time.time()))
@@ -29,6 +30,7 @@ class Scrobbler(object):
                   'api_key': config.apiKey,
                   'sk': self.sessionKey()}
         params['api_sig'] = self.sign(params)
+        self.request(params)
 
     def sessionKey(self):
         if os.path.exists(config.sessionFile):
