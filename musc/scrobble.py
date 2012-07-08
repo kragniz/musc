@@ -63,6 +63,17 @@ class Scrobbler(object):
         params['api_sig'] = self.sign(params)
         print self.request(params)
 
+    def nowPlaying(self, artist, track):
+        timestamp = str(int(time.time()))
+        params = {'artist': artist,
+                  'method': 'track.updateNowPlaying',
+                  'track': track,
+                  'timestamp': timestamp,
+                  'api_key': config.apiKey,
+                  'sk': self.sessionKey()}
+        params['api_sig'] = self.sign(params)
+        print self.request(params)
+
     def sign(self, methods):
         l = []
         s = ''
@@ -76,4 +87,4 @@ class Scrobbler(object):
 
 if __name__ == '__main__':
     s = Scrobbler()
-    s.scrobble('Parov Stelar', 'For Rose')
+    s.nowPlaying('Parov Stelar', 'For Rose')
