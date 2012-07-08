@@ -3,13 +3,45 @@ import socket
 import mpg
 import re
 import musc
+from mutagen import File
+import threading
+import time
 
 class Server(object):
+
+    class ManageQueue(threading.Thread):
+        '''Handle playing a song after the current one has finished'''
+        def __init__(self, mpg):
+            super(Server.ManageQueue, self).__init__()
+            self._mpg = mpg
+
+        def run(self):
+            while True:
+                if not self._mpg.playing:
+                    self._mpg.next()
+                time.sleep(0.5)
+
+    class Metadata(object):
+        '''Get the metadata for a file.
+        Data you probably need:
+            artist
+            title
+            album
+            tracknumber
+            date'''
+        def __init__(self, filename):
+            self.__audio = File(filename, easy=True)
+
+        def __getattr__(self, name):
+            return self.__audio[name]
+
     def __init__(self):
         self._mpg = mpg.Mpg()
         self.loadPlaylist('/home/louis/playlist')
 
         self._playmode = 'r'
+        queueThread = self.ManageQueue(self._mpg)
+        queueThread.start()
 
     def doAction(self, args):
         '''Perform a server action based on the arguments given.'''

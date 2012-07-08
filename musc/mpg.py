@@ -67,18 +67,6 @@ class Mpg(object):
                 else:
                     self._states.playing = True
 
-    class ManageQueue(threading.Thread):
-        def __init__(self, states, mpg):
-            super(Mpg.ManageQueue, self).__init__()
-            self._states = states
-            self._mpg = mpg
-
-        def run(self):
-            while True:
-                if not self._states.playing:
-                    self._mpg.next()
-                time.sleep(0.5)
-
     def __init__(self):
         self.__mpgProc = Popen([self.command, '-R', 'null'],
                 stdin=PIPE,
@@ -90,9 +78,6 @@ class Mpg(object):
         inputThread = self.GetInput(self._read,
                                     self._states)
         inputThread.start()
-
-        queueThread = self.ManageQueue(self._states, self)
-        queueThread.start()
 
     def _send(self, message):
         '''Send a command to mpg'''

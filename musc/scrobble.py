@@ -24,7 +24,7 @@ class Scrobbler(object):
                   'Content-type': 'application/x-www-form-urlencoded'}
 
         lastfm = httplib.HTTPConnection('ws.audioscrobbler.com')
-        lastfm.request('POST','/2.0/?',params,header)
+        lastfm.request('POST', '/2.0/?' ,params, header)
         response = lastfm.getresponse()
         return response.read()
 
