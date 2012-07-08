@@ -10,6 +10,26 @@ class Scrobbler(object):
     def __init__(self):
         self.token = self.getToken()
 
+    def scrobble(self, artist, track):
+        timestamp = str(int(time.time()))
+        params = {'artist': artist,
+                  'method': 'track.scrobble',
+                  'track': track,
+                  'timestamp': timestamp,
+                  'api_key': config.apiKey,
+                  'sk': self.sessionKey()}
+        params['api_sig'] = self.sign(params)
+
+    def nowPlaying(self, artist, track):
+        timestamp = str(int(time.time()))
+        params = {'artist': artist,
+                  'method': 'track.updateNowPlaying',
+                  'track': track,
+                  'timestamp': timestamp,
+                  'api_key': config.apiKey,
+                  'sk': self.sessionKey()}
+        params['api_sig'] = self.sign(params)
+
     def sessionKey(self):
         if os.path.exists(config.sessionFile):
             with open(config.sessionFile) as f:
@@ -51,28 +71,6 @@ class Scrobbler(object):
                               'api_sig': config.apiSig,
                               'api_key': config.apiKey})
         return re.search('<token.+token>', token).group()[7:-8]
-
-    def scrobble(self, artist, track):
-        timestamp = str(int(time.time()))
-        params = {'artist': artist,
-                  'method': 'track.scrobble',
-                  'track': track,
-                  'timestamp': timestamp,
-                  'api_key': config.apiKey,
-                  'sk': self.sessionKey()}
-        params['api_sig'] = self.sign(params)
-        print self.request(params)
-
-    def nowPlaying(self, artist, track):
-        timestamp = str(int(time.time()))
-        params = {'artist': artist,
-                  'method': 'track.updateNowPlaying',
-                  'track': track,
-                  'timestamp': timestamp,
-                  'api_key': config.apiKey,
-                  'sk': self.sessionKey()}
-        params['api_sig'] = self.sign(params)
-        print self.request(params)
 
     def sign(self, methods):
         l = []

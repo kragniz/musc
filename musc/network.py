@@ -6,6 +6,7 @@ import musc
 from mutagen import File
 import threading
 import time
+from scrobble import Scrobbler
 
 class Server(object):
 
@@ -14,12 +15,25 @@ class Server(object):
         def __init__(self, mpg):
             super(Server.ManageQueue, self).__init__()
             self._mpg = mpg
+            self._scrobbler = Scrobbler()
+            self.scrobbled = False
 
         def run(self):
             while True:
+                if self._mpg.timeToScrobble and not self.scrobbled:
+                    print 'scrobbling this track!'
+                    metadata = Server.Metadata(self._mpg.filename)
+                    self._scrobbler.scrobble(metadata.artist, metadata.title)
+                    self.scrobbled = True
+
                 if not self._mpg.playing:
                     self._mpg.next()
-                time.sleep(0.5)
+                    print '....next'
+                    metadata = Server.Metadata(self._mpg.filename)
+                    self._scrobbler.nowPlaying(metadata.artist,
+                                               metadata.title)
+                    self.scrobbled = False
+                time.sleep(0.1)
 
     class Metadata(object):
         '''Get the metadata for a file.
@@ -33,7 +47,7 @@ class Server(object):
             self.__audio = File(filename, easy=True)
 
         def __getattr__(self, name):
-            return self.__audio[name]
+            return self.__audio[name][0]
 
     def __init__(self):
         self._mpg = mpg.Mpg()

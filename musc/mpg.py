@@ -21,6 +21,8 @@ class Mpg(object):
             self.paused = False
             self.volume = 100
 
+            self.filename = ''
+
             self.inputLock = threading.Lock()
             self.outputLock = threading.Lock()
 
@@ -101,6 +103,7 @@ class Mpg(object):
 
     def load(self, filename):
         '''Load a new file to play'''
+        self._states.filename = filename.replace('\n', '')
         self._send('LOAD %s' % filename)
 
     def pause(self):
@@ -140,9 +143,10 @@ class Mpg(object):
         '''Return True if music is currently playing'''
         return self._states.playing is True
 
-    @playing.setter
-    def playing(self, b):
-        self._states.playing = b
+    @property
+    def timeToScrobble(self):
+        '''Return True if more than 30 seconds have elapsed'''
+        return self._states.timeRemaining < 10
 
     @property
     def queue(self):
@@ -152,6 +156,10 @@ class Mpg(object):
     @queue.setter
     def queue(self, item):
         self._playQueue = item
+
+    @property
+    def filename(self):
+        return self._states.filename
 
 
 if __name__ == '__main__':
