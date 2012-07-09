@@ -10,7 +10,7 @@ class Scrobbler(object):
     def __init__(self):
         self.token = self.getToken()
 
-    def scrobble(self, artist, track):
+    def scrobble(self, artist, track, album=None):
         timestamp = str(int(time.time()))
         params = {'artist': artist,
                   'method': 'track.scrobble',
@@ -18,10 +18,12 @@ class Scrobbler(object):
                   'timestamp': timestamp,
                   'api_key': config.apiKey,
                   'sk': self.sessionKey()}
+        if album:
+            params['album'] = album
         params['api_sig'] = self.sign(params)
-        self.request(params)
+        print self.request(params)
 
-    def nowPlaying(self, artist, track):
+    def nowPlaying(self, artist, track, album=None):
         timestamp = str(int(time.time()))
         params = {'artist': artist,
                   'method': 'track.updateNowPlaying',
@@ -29,8 +31,11 @@ class Scrobbler(object):
                   'timestamp': timestamp,
                   'api_key': config.apiKey,
                   'sk': self.sessionKey()}
+        if album:
+            params['album'] = album
+ 
         params['api_sig'] = self.sign(params)
-        self.request(params)
+        print self.request(params)
 
     def sessionKey(self):
         if os.path.exists(config.sessionFile):

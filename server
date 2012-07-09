@@ -9,14 +9,18 @@ PORT = musc.config.PORT
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.bind((HOST, PORT))
 s.listen(1)
-while True:
-    conn, addr = s.accept()
-    while 1:
-        data = conn.recv(1024)
-        if not data: break
-        message = server.doAction(json.loads(data)['args'])
-        if message: #use data as the arguments
-            conn.sendall(str(message))
-        else:
-            conn.sendall('ERROR')
-    conn.close()
+try:
+    while True:
+        conn, addr = s.accept()
+        while 1:
+            data = conn.recv(1024)
+            if not data: break
+            message = server.doAction(json.loads(data)['args'])
+            if message: #use data as the arguments
+                conn.sendall(str(message))
+            else:
+                conn.sendall('ERROR')
+        conn.close()
+except KeyboardInterrupt:
+    server.quit()
+    sys.exit()

@@ -3,6 +3,8 @@
 from subprocess import Popen, PIPE
 import threading
 import time
+import network
+import random
 
 class Mpg(object):
     command = 'mpg123' #the command used to play mp3 files
@@ -10,8 +12,6 @@ class Mpg(object):
     class States(object):
         '''Class used to hold bunch of states'''
         def __init__(self):
-            self.threadRunning = True
-
             self.playStatus = 0
             self.currentFrame = None
             self.framesRemaining = 0
@@ -42,13 +42,15 @@ class Mpg(object):
 
     class GetInput(threading.Thread):
         '''Thread used to collect status from mpg's stdout'''
-        def __init__(self, reader, states):
+        def __init__(self, reader, states, timeToQuit):
             super(Mpg.GetInput, self).__init__()
             self._reader = reader
             self._states = states
+
+            self._timeToQuit = timeToQuit
             
         def run(self):
-            while self._states.threadRunning:
+            while not self._timeToQuit.isTime:
                 output = self._reader()
                 if output[0] == '@':
                     outputType = output[1]
@@ -76,9 +78,12 @@ class Mpg(object):
 
         self._states = self.States()
 
+        self._timeToQuit = network.TimeToQuit()
+
         self._playQueue = []
         inputThread = self.GetInput(self._read,
-                                    self._states)
+                                    self._states,
+                                    self._timeToQuit)
         inputThread.start()
 
     def _send(self, message):
@@ -99,6 +104,7 @@ class Mpg(object):
 
     def quit(self):
         '''Quit the mpg process'''
+        self._timeToQuit.isTime = True
         self._send('QUIT')
 
     def load(self, filename):
@@ -109,6 +115,8 @@ class Mpg(object):
     def pause(self):
         '''Pause the music'''
         self._send('PAUSE')
+        if self._states.paused: print 'Unpaused'
+        else: print 'Paused'
         self._states.paused = not self._states.paused
 
     @property
@@ -162,6 +170,9 @@ class Mpg(object):
     def filename(self):
         return self._states.filename
 
+    def shuffle(self):
+        '''Shuffle the queue around'''
+        random.shuffle(self._playQueue)
 
 if __name__ == '__main__':
     p = Mpg()
